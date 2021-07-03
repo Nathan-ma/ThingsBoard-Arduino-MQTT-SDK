@@ -10,7 +10,7 @@
 #if !defined(ESP8266) || !defined(ESP32)
 // #include <ArduinoHttpClient.h>
 #endif
-
+#include <HTTPClient.h>
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
 #include "ArduinoJson/Polyfills/type_traits.hpp"
@@ -28,7 +28,7 @@ class Telemetry {
             typename Logger = ThingsBoardDefaultLogger,
             size_t NumRPCCallbacks = Default_NumRPCCallbacks>
   friend class ThingsBoardSized;
-#if !define(ESP8266) || !define(ESP32)
+#if !defined(ESP8266) || !defined(ESP32)
   template <size_t PayloadSize = Default_Payload,
             size_t MaxFieldsAmt = Default_Fields_Amt,
             typename Logger = ThingsBoardDefaultLogger>
@@ -393,7 +393,7 @@ private:
 template<size_t PayloadSize, size_t MaxFieldsAmt, typename Logger, size_t NumRPCCallbacks>
 ThingsBoardSized<PayloadSize, MaxFieldsAmt, Logger, NumRPCCallbacks> *ThingsBoardSized<PayloadSize, MaxFieldsAmt, Logger, NumRPCCallbacks>::m_subscribedInstance;
 
-#ifndef ESP8266
+#if !defined(ESP8266) || !defined(ESP32)
 
 // ThingsBoard HTTP client class
 template <size_t PayloadSize, size_t MaxFieldsAmt, typename Logger>
@@ -403,7 +403,7 @@ public:
   // Initializes ThingsBoardHttpSized class with network client.
   inline ThingsBoardHttpSized(Client &client, const char *access_token,
     const char *host, int port = 80)
-      :m_client(client, host, port)
+      :m_actual_client(client)
       ,m_host(host)
       ,m_token(access_token)
       ,m_port(port)
@@ -446,22 +446,23 @@ public:
       return  false;
     }
 
-    if (!m_client.connected()) {
-      if (!m_client.connect(m_host, m_port)) {
-        Logger::log("connect to server failed");
-        return false;
-      }
-    }
+    // if (!m_client.connected()) {
+    //   if (!m_client.connect(m_host, m_port)) {
+    //     Logger::log("connect to server failed");
+    //     return false;
+    //   }
+    // }
 
     bool rc = true;
 
     String path = String("/api/v1/") + m_token + "/telemetry";
-    if (!m_client.post(path, "application/json", json) ||
-        (m_client.responseStatusCode() != HTTP_SUCCESS)) {
+    m_client.begin(m_actual_client, m_host, m_port, path);
+    m_client.addHeader("Content-Type", "application/json");
+    if (m_client.POST(json) != HTTP_CODE_OK) {
       rc = false;
     }
 
-    m_client.stop();
+    m_client.end();
     return rc;
   }
 
@@ -499,22 +500,23 @@ public:
       return  false;
     }
 
-    if (!m_client.connected()) {
-      if (!m_client.connect(m_host, m_port)) {
-        Logger::log("connect to server failed");
-        return false;
-      }
-    }
+    // if (!m_client.connected()) {
+    //   if (!m_client.connect(m_host, m_port)) {
+    //     Logger::log("connect to server failed");
+    //     return false;
+    //   }
+    // }
 
     bool rc = true;
 
     String path = String("/api/v1/") + m_token + "/attributes";
-    if (!m_client.post(path, "application/json", json)
-          || (m_client.responseStatusCode() != HTTP_SUCCESS)) {
+    m_client.begin(m_actual_client, m_host, m_port, path);
+    m_client.addHeader("Content-Type", "application/json");
+    if (m_client.POST(json) != HTTP_CODE_OK) {
       rc = false;
     }
 
-    m_client.stop();
+    m_client.end();
     return rc;
   }
 
@@ -570,8 +572,8 @@ private:
     }
     return telemetry ? sendTelemetryJson(payload) : sendAttributeJSON(payload);
   }
-
-  HttpClient m_client;
+  WiFiClient m_actual_client;
+  HTTPClient m_client;
   const char *m_host;
   int m_port;
   const char *m_token;
