@@ -10,6 +10,9 @@
 #if !defined(ESP8266) || !defined(ESP32)
 // #include <ArduinoHttpClient.h>
 #endif
+
+#define MQTT_MAX_TRANSFER_SIZE 80
+
 #include <HTTPClient.h>
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
@@ -140,6 +143,7 @@ public:
       return false;
     }
     this->RPC_Unsubscribe(); // Cleanup any subscriptions
+    m_client.setBufferSize(1024);
     m_client.setServer(host, port);
     return m_client.connect("TbDev", access_token, NULL);
   }
@@ -255,6 +259,8 @@ public:
     ThingsBoardSized::m_subscribedInstance = NULL;
     return m_client.unsubscribe("v1/devices/me/rpc/request/+");
   }
+  
+  PubSubClient& getClient() { return m_client;}
 
 private:
   // Sends single key-value in a generic way.
