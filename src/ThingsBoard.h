@@ -260,7 +260,7 @@ public:
     return m_client.unsubscribe("v1/devices/me/rpc/request/+");
   }
   
-  PubSubClient& getClient() { return m_client;}
+  PubSubClient* getClient() { return &m_client;}
 
 private:
   // Sends single key-value in a generic way.
