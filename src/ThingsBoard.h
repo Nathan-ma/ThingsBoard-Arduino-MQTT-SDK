@@ -130,7 +130,9 @@ class ThingsBoardSized
 {
 public:
   // Initializes ThingsBoardSized class with network client.
-  inline ThingsBoardSized(Client &client) :m_client(client) { }
+  inline ThingsBoardSized(Client &client) :m_client(client) { 
+    m_client.setBufferSize(1024);
+  }
 
   // Destroys ThingsBoardSized class with network client.
   inline ~ThingsBoardSized() { }
@@ -143,7 +145,6 @@ public:
       return false;
     }
     this->RPC_Unsubscribe(); // Cleanup any subscriptions
-    m_client.setBufferSize(1024);
     m_client.setServer(host, port);
     return m_client.connect("TbDev", access_token, NULL);
   }
