@@ -1029,7 +1029,7 @@ class ThingsBoardSized
         return false;
       }
 
-      return telemetry ? sendTelemetryJson(object) : sendAttributeJSON(object);
+      return telemetry ? sendTelemetryJson((JsonObject)object) : sendAttributeJSON((JsonObject)object);
     }
 
     // Processes RPC message
