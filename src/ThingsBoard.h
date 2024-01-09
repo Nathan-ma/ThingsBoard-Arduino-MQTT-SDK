@@ -11,13 +11,12 @@
 // #include <ArduinoHttpClient.h>
 #endif
 
-#define MQTT_MAX_TRANSFER_SIZE 80
-
 #include <HTTPClient.h>
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
 #include "ArduinoJson/Polyfills/type_traits.hpp"
 
+#define MQTT_MAX_TRANSFER_SIZE 80
 #define Default_Payload 64
 #define Default_Fields_Amt 8
 #define Default_NumRPCCallbacks 8
@@ -26,15 +25,16 @@ class ThingsBoardDefaultLogger;
 
 // Telemetry record class, allows to store different data using common interface.
 class Telemetry {
-  template <size_t PayloadSize = Default_Payload,
-            size_t MaxFieldsAmt = Default_Fields_Amt,
-            typename Logger = ThingsBoardDefaultLogger,
-            size_t NumRPCCallbacks = Default_NumRPCCallbacks>
+  template <size_t PayloadSize, 
+            size_t MaxFieldsAmt,
+            typename Logger, 
+            size_t NumRPCCallbacks> 
   friend class ThingsBoardSized;
 #if !defined(ESP8266) || !defined(ESP32)
-  template <size_t PayloadSize = Default_Payload,
-            size_t MaxFieldsAmt = Default_Fields_Amt,
-            typename Logger = ThingsBoardDefaultLogger>
+  template <size_t PayloadSize,
+            size_t MaxFieldsAmt,
+            typename Logger,
+            size_t NumRPCCallbacks>
   friend class ThingsBoardHttpSized;
 #endif
 public:
@@ -125,7 +125,10 @@ public:
 };
 
 // ThingsBoardSized client class
-template <size_t PayloadSize, size_t MaxFieldsAmt, typename Logger, size_t NumRPCCallbacks>
+template <size_t PayloadSize = Default_Payload,
+          size_t MaxFieldsAmt = Default_Fields_Amt,
+          typename Logger = ThingsBoardDefaultLogger,
+          size_t NumRPCCallbacks = Default_NumRPCCallbacks >
 class ThingsBoardSized
 {
 public:
@@ -403,7 +406,10 @@ ThingsBoardSized<PayloadSize, MaxFieldsAmt, Logger, NumRPCCallbacks> *ThingsBoar
 #if !defined(ESP8266) || !defined(ESP32)
 
 // ThingsBoard HTTP client class
-template <size_t PayloadSize, size_t MaxFieldsAmt, typename Logger>
+template <size_t PayloadSize = Default_Payload,
+          size_t MaxFieldsAmt = Default_Fields_Amt,
+          typename Logger = ThingsBoardDefaultLogger,
+          size_t NumRPCCallbacks = Default_NumRPCCallbacks>
 class ThingsBoardHttpSized
 {
 public:
