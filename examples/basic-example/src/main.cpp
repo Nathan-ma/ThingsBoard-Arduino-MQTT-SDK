@@ -1,9 +1,10 @@
+#include <Arduino.h>
+#include <WiFi.h>
+#include <WiFiClientSecure.h>
 #include "ThingsBoard.h"
 
-#include <ESP8266WiFi.h>
 
-
-#define WIFI_AP             "YOUR_WIFI_AP"
+#define WIFI_SSID             "YOUR_WIFI_AP"
 #define WIFI_PASSWORD       "YOUR_WIFI_PASSWORD"
 
 // See https://thingsboard.io/docs/getting-started-guides/helloworld/
@@ -11,29 +12,26 @@
 #define TOKEN               "YOUR_ACCESS_TOKEN"
 #define THINGSBOARD_SERVER  "demo.thingsboard.io"
 
-// Baud rate for debug serial
-#define SERIAL_DEBUG_BAUD   115200
-
-// Initialize ThingsBoard client
-WiFiClient espClient;
-// Initialize ThingsBoard instance
-ThingsBoard tb(espClient);
-// the Wifi radio's status
+WiFiClient wifi;
+ThingsBoard tb(wifi);
 int status = WL_IDLE_STATUS;
 
 void setup() {
   // initialize serial for debugging
-  Serial.begin(SERIAL_DEBUG_BAUD);
-  WiFi.begin(WIFI_AP, WIFI_PASSWORD);
-  InitWiFi();
+  Serial.begin(115200);
+
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  Serial.println("Connecting to WiFi...");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println("\nConnected to AP");
 }
 
 void loop() {
   delay(1000);
-
-  if (WiFi.status() != WL_CONNECTED) {
-    reconnect();
-  }
 
   if (!tb.connected()) {
     // Connect to the ThingsBoard
@@ -57,30 +55,4 @@ void loop() {
   tb.sendTelemetryFloat("humidity", 42.5);
 
   tb.loop();
-}
-
-void InitWiFi()
-{
-  Serial.println("Connecting to AP ...");
-  // attempt to connect to WiFi network
-
-  WiFi.begin(WIFI_AP, WIFI_PASSWORD);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("Connected to AP");
-}
-
-void reconnect() {
-  // Loop until we're reconnected
-  status = WiFi.status();
-  if ( status != WL_CONNECTED) {
-    WiFi.begin(WIFI_AP, WIFI_PASSWORD);
-    while (WiFi.status() != WL_CONNECTED) {
-      delay(500);
-      Serial.print(".");
-    }
-    Serial.println("Connected to AP");
-  }
 }

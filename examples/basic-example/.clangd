@@ -1,0 +1,21 @@
+CompileFlags:
+  Remove: [-fno-tree-switch-conversion, -mtext-section-literals, -mlongcalls, -fstrict-volatile-bitfields]
+  Add: [-std=c++17]
+Index:
+  Background: true
+  Priority: 0
+
+Completion:
+  Snippet: true
+
+Diagnostics:
+  ClangTidy:
+    Checks: '-*,clang-analyzer-*'
+
+  IncludeBlocks:
+    - system
+    - user
+
+FallbackFlags:
+  Add: [-std=c++17]
+

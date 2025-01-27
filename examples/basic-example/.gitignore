@@ -1,0 +1,5 @@
+.pio
+.cache/
+ThingsBoard.cpp
+ThingsBoard.h
+compile_commands.json
